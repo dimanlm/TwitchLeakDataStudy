@@ -5,12 +5,6 @@ import numpy as np
 
 "----------------------------------------------------"
 
-#CSV_FILE_NAME = 'all_revenues.csv'
-PATH_TO_THE_CSV_FILE = 'LeakTwitch/all_revenues/2020/01/all_revenues.csv'
-importedTwitchData = pd.read_csv(PATH_TO_THE_CSV_FILE)
-
-"----------------------------------------------------"
-
 def addNewColumnToDataFrame(aDataFrame, newColumnName, newColumnData):
     aDataFrame[newColumnName] = newColumnData
 
@@ -20,26 +14,33 @@ def computeStreamersMonthlyIncome(twitchData):
     return(twitchData.iloc[:, allRevenueColumns].sum(axis=1))
 
 
-def streamerMinimumRevenue(twitchData):
+def streamersMinimumRevenue(twitchData):
     monthlyRevenueColumn = pd.DataFrame(twitchData, columns=['total_monthly_revenue'])
-    return (monthlyRevenueColumn.min())
+    return (monthlyRevenueColumn.min().values[0])
 
 
-def streamerMaximumRevenue(twitchData):
+def streamersMaximumRevenue(twitchData):
     monthlyRevenueColumn = pd.DataFrame(twitchData, columns=['total_monthly_revenue'])
-    return (monthlyRevenueColumn.max())
+    return (monthlyRevenueColumn.max().values[0])
 
 
-def streamerAverageRevenue(twitchData):
+def streamersAverageRevenue(twitchData):
     monthlyRevenueColumn = pd.DataFrame(twitchData, columns=['total_monthly_revenue'])
-    return (monthlyRevenueColumn.mean())
+    return (round(monthlyRevenueColumn.mean().values[0], 2))
 
 
-def streamerMedianRevenue(twitchData):
+def streamersMedianRevenue(twitchData):
     monthlyRevenueColumn = pd.DataFrame(twitchData, columns=['total_monthly_revenue'])
-    return (monthlyRevenueColumn.median())
+    return (monthlyRevenueColumn.median().values[0])
 
 "----------------------------------------------------"
+"----------------------------------------------------"
+
+CSV_FILE_NAME = '/all_revenues.csv'
+PATH_TO_THE_CSV_FILE = 'LeakTwitch/all_revenues/2020/01'
+importedTwitchData = pd.read_csv(PATH_TO_THE_CSV_FILE+CSV_FILE_NAME)
 
 streamersMonthlyRevenue = computeStreamersMonthlyIncome(importedTwitchData)    
 addNewColumnToDataFrame(importedTwitchData, 'total_monthly_revenue', streamersMonthlyRevenue)
+
+print(streamersAverageRevenue(importedTwitchData))
