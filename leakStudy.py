@@ -21,30 +21,32 @@ def computeStreamersMonthlyIncome(twitchData):
 
 
 def streamersMinimumRevenue(twitchData):
-    monthlyRevenueColumn = pd.DataFrame(twitchData, columns=['total_monthly_revenue'])
-    return (monthlyRevenueColumn.min().values[0])
+    monthlyRevenueDf = pd.DataFrame(twitchData, columns=[USER_ID_COLUMN,TOTAL_MONTHLY_REVENUE_COLUMN])
+    getMinValue = monthlyRevenueDf.loc[monthlyRevenueDf[TOTAL_MONTHLY_REVENUE_COLUMN].idxmin()]
+    return (getMinValue)
 
 
 def streamersMaximumRevenue(twitchData):
-    monthlyRevenueColumn = pd.DataFrame(twitchData, columns=['total_monthly_revenue'])
-    return (monthlyRevenueColumn.max().values[0])
+    monthlyRevenueDf = pd.DataFrame(twitchData, columns=[USER_ID_COLUMN,TOTAL_MONTHLY_REVENUE_COLUMN])
+    getMaxValue = monthlyRevenueDf.loc[monthlyRevenueDf[TOTAL_MONTHLY_REVENUE_COLUMN].idxmax()]
+    return (getMaxValue)
 
 
 def streamersAverageRevenue(twitchData):
-    monthlyRevenueColumn = pd.DataFrame(twitchData, columns=['total_monthly_revenue'])
+    monthlyRevenueColumn = pd.DataFrame(twitchData, columns=[TOTAL_MONTHLY_REVENUE_COLUMN])
     return (round(monthlyRevenueColumn.mean().values[0], 2))
 
 
 def streamersMedianRevenue(twitchData):
-    monthlyRevenueColumn = pd.DataFrame(twitchData, columns=['total_monthly_revenue'])
+    monthlyRevenueColumn = pd.DataFrame(twitchData, columns=[TOTAL_MONTHLY_REVENUE_COLUMN])
     return (monthlyRevenueColumn.median().values[0])
 
 "----------------------------------------------------"
 "----------------------------------------------------"
 
-CSV_FILE_NAME = '/all_revenues.csv'
-PATH_TO_THE_CSV_FILE = 'LeakTwitch/all_revenues/2020/01'
-importedTwitchData = pd.read_csv(PATH_TO_THE_CSV_FILE+CSV_FILE_NAME)
+if __name__ == "__main__":
 
-streamersMonthlyRevenue = computeStreamersMonthlyIncome(importedTwitchData)    
-addNewColumnToDataFrame(importedTwitchData, 'total_monthly_revenue', streamersMonthlyRevenue)
+    TOTAL_MONTHLY_REVENUE_COLUMN = 'total_monthly_revenue'
+    USER_ID_COLUMN = 'user_id'
+    TOTAL_MONTHS = 12
+    CSV_FILE_NAME = '/all_revenues.csv'
