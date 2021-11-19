@@ -2,11 +2,17 @@
 
 import pandas as pd
 import numpy as np
+import requests
 
 "----------------------------------------------------"
 
 def addNewColumnToDataFrame(aDataFrame, newColumnName, newColumnData):
     aDataFrame[newColumnName] = newColumnData
+
+
+def getStreamersNickname(streamersUserID):
+    API_REQUEST_NICKNAME = "https://customapi.aidenwallis.co.uk/api/v1/twitch/toName/"+streamersUserID
+    return (requests.get(API_REQUEST_NICKNAME).text)
 
 
 def computeStreamersMonthlyIncome(twitchData):
@@ -42,5 +48,3 @@ importedTwitchData = pd.read_csv(PATH_TO_THE_CSV_FILE+CSV_FILE_NAME)
 
 streamersMonthlyRevenue = computeStreamersMonthlyIncome(importedTwitchData)    
 addNewColumnToDataFrame(importedTwitchData, 'total_monthly_revenue', streamersMonthlyRevenue)
-
-print(streamersAverageRevenue(importedTwitchData))
