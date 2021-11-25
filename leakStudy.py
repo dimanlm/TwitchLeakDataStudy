@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import requests
 import time
+import matplotlib.pyplot as plt
 
 "----------------------------------------------------"
 
@@ -22,15 +23,15 @@ def computeStreamersMonthlyIncome(twitchData):
 
 
 def streamersMinimumRevenue(twitchData):
-    monthlyRevenueDf = pd.DataFrame(twitchData, columns=[USER_ID_COLUMN,TOTAL_MONTHLY_REVENUE_COLUMN])
-    getMinValue = monthlyRevenueDf.loc[monthlyRevenueDf[TOTAL_MONTHLY_REVENUE_COLUMN].idxmin()]
-    return (getMinValue)
+    monthlyRevenueOverviewDf = pd.DataFrame(twitchData, columns=[USER_ID_COLUMN,TOTAL_MONTHLY_REVENUE_COLUMN])
+    getMinIncomeThisMonth = monthlyRevenueOverviewDf.loc[monthlyRevenueOverviewDf[TOTAL_MONTHLY_REVENUE_COLUMN].idxmin()]
+    return (getMinIncomeThisMonth)
 
 
 def streamersMaximumRevenue(twitchData):
-    monthlyRevenueDf = pd.DataFrame(twitchData, columns=[USER_ID_COLUMN,TOTAL_MONTHLY_REVENUE_COLUMN])
-    getMaxValue = monthlyRevenueDf.loc[monthlyRevenueDf[TOTAL_MONTHLY_REVENUE_COLUMN].idxmax()]
-    return (getMaxValue)
+    monthlyRevenueOverviewDf = pd.DataFrame(twitchData, columns=[USER_ID_COLUMN,TOTAL_MONTHLY_REVENUE_COLUMN])
+    getMaxIncomeThisMonth = monthlyRevenueOverviewDf.loc[monthlyRevenueOverviewDf[TOTAL_MONTHLY_REVENUE_COLUMN].idxmax()]
+    return (getMaxIncomeThisMonth)
 
 
 def streamersAverageRevenue(twitchData):
@@ -46,33 +47,40 @@ def streamersMedianRevenue(twitchData):
 "----------------------------------------------------"
 
 if __name__ == "__main__":
+    t0 = time.time()
 
     TOTAL_MONTHLY_REVENUE_COLUMN = 'total_monthly_revenue'
     USER_ID_COLUMN = 'user_id'
     TOTAL_MONTHS = 12
     CSV_FILE_NAME = '/all_revenues.csv'
 
-    t0 = time.time()
+    allMonthlyRevenuesDataf = pd.DataFrame()
+    monthlyRevenueOverviewDataf = pd.DataFrame()
+    annualRevenueOverviewDf = pd.DataFrame()
 
-    monthlyRevenueDf = pd.DataFrame()
-    
     for i in range(1,TOTAL_MONTHS+1):
-
         if i<10:
             PATH_TO_THE_CSV_FILE = 'LeakTwitch/all_revenues/2020/0'+str(i)
         else:
             PATH_TO_THE_CSV_FILE = 'LeakTwitch/all_revenues/2020/'+str(i)
-        importedTwitchData = pd.read_csv(PATH_TO_THE_CSV_FILE+CSV_FILE_NAME)
         
+        importedTwitchData = pd.read_csv(PATH_TO_THE_CSV_FILE+CSV_FILE_NAME)
+        addNewColumnToDataFrame(importedTwitchData, TOTAL_MONTHLY_REVENUE_COLUMN, computeStreamersMonthlyIncome(importedTwitchData))
 
-        streamersMonthlyRevenue = computeStreamersMonthlyIncome(importedTwitchData)    
-        addNewColumnToDataFrame(importedTwitchData, TOTAL_MONTHLY_REVENUE_COLUMN, streamersMonthlyRevenue)
+        monthlyRevenueOverviewDataf.loc[i, "Minimum"]= streamersMinimumRevenue(importedTwitchData)[TOTAL_MONTHLY_REVENUE_COLUMN]
+        monthlyRevenueOverviewDataf.loc[i, "Maximum"]= streamersMaximumRevenue(importedTwitchData)[TOTAL_MONTHLY_REVENUE_COLUMN]
+        monthlyRevenueOverviewDataf.loc[i, "Who?"]= getStreamersNickname(str(streamersMaximumRevenue(importedTwitchData)[USER_ID_COLUMN])[:-2])
+        monthlyRevenueOverviewDataf.loc[i, "Average"]= streamersAverageRevenue(importedTwitchData)
+        monthlyRevenueOverviewDataf.loc[i, "Median"]= streamersMedianRevenue(importedTwitchData)
 
-        monthlyRevenueDf.loc[i, "Minimum"]= streamersMinimumRevenue(importedTwitchData)[TOTAL_MONTHLY_REVENUE_COLUMN]
-        monthlyRevenueDf.loc[i, "Maximum"]= streamersMaximumRevenue(importedTwitchData)[TOTAL_MONTHLY_REVENUE_COLUMN]
-        monthlyRevenueDf.loc[i, "Who?"]= getStreamersNickname(str(streamersMaximumRevenue(importedTwitchData)[USER_ID_COLUMN])[:-2])
-        monthlyRevenueDf.loc[i, "Average"]= streamersAverageRevenue(importedTwitchData)
-        monthlyRevenueDf.loc[i, "Median"]= streamersMedianRevenue(importedTwitchData)
-  
-    print(monthlyRevenueDf)
+        selectedColumnsToAppend = importedTwitchData[[USER_ID_COLUMN, TOTAL_MONTHLY_REVENUE_COLUMN]].copy()
+        allMonthlyRevenuesDataf=allMonthlyRevenuesDataf.append(selectedColumnsToAppend, ignore_index=True)   
+
+    aggregateRevenues = {TOTAL_MONTHLY_REVENUE_COLUMN: 'sum'}
+    eachStreamerTotalRevenueDataf= allMonthlyRevenuesDataf.groupby(USER_ID_COLUMN, as_index=False).aggregate(aggregateRevenues).reindex(columns=allMonthlyRevenuesDataf.columns)
+    eachStreamerTotalRevenueDataf.rename(columns={TOTAL_MONTHLY_REVENUE_COLUMN: "TotalRevenue"}, inplace=True)
+ 
+    print(eachStreamerTotalRevenueDataf)
+    print(monthlyRevenueOverviewDataf)
+
     print("\nData scanned in ", round(time.time()-t0, 2), " seconds\n")
