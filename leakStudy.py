@@ -78,9 +78,17 @@ if __name__ == "__main__":
 
     aggregateRevenues = {TOTAL_MONTHLY_REVENUE_COLUMN: 'sum'}
     eachStreamerTotalRevenueDataf= allMonthlyRevenuesDataf.groupby(USER_ID_COLUMN, as_index=False).aggregate(aggregateRevenues).reindex(columns=allMonthlyRevenuesDataf.columns)
-    eachStreamerTotalRevenueDataf.rename(columns={TOTAL_MONTHLY_REVENUE_COLUMN: "TotalRevenue"}, inplace=True)
+
+    annualRevenueOverviewDf.loc[i, "annual_Minimum"]= streamersMinimumRevenue(eachStreamerTotalRevenueDataf)[TOTAL_MONTHLY_REVENUE_COLUMN]
+    annualRevenueOverviewDf.loc[i, "annual_Maximum"]= streamersMaximumRevenue(eachStreamerTotalRevenueDataf)[TOTAL_MONTHLY_REVENUE_COLUMN]
+    annualRevenueOverviewDf.loc[i, "annual_Average"]= streamersAverageRevenue(eachStreamerTotalRevenueDataf)
+    annualRevenueOverviewDf.loc[i, "annual_Median"]= streamersMedianRevenue(eachStreamerTotalRevenueDataf)
+
+    highestPaidStreamer = getStreamersNickname(str(streamersMaximumRevenue(eachStreamerTotalRevenueDataf).values[0])[:-2])
  
-    print(eachStreamerTotalRevenueDataf)
     print(monthlyRevenueOverviewDataf)
+    print('\n')
+    print(annualRevenueOverviewDf)
+    print("Highest paid streamer of 2020: " + highestPaidStreamer)
 
     print("\nData scanned in ", round(time.time()-t0, 2), " seconds\n")
