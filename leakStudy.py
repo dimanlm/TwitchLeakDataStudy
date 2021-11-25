@@ -95,8 +95,27 @@ if __name__ == "__main__":
     print(annualRevenueOverviewDataf)
     print("\nThe highest paid streamer of 2020: " + highestPaidStreamer)
 
-    eachStreamerTotalRevenueDataf.sort_values(by=TOTAL_MONTHLY_REVENUE_COLUMN, ascending=False)
-    plt.scatter(x =  eachStreamerTotalRevenueDataf[TOTAL_MONTHLY_REVENUE_COLUMN],y=eachStreamerTotalRevenueDataf[USER_ID_COLUMN])
-    plt.show()
+    fig, axs = plt.subplots(4, 1, constrained_layout=True)
+    fig.suptitle('Twitch data plots', fontsize=16)
+    
+    plt.xticks(monthlyRevenueOverviewDataf['Median'], monthlyRevenueOverviewDataf.index.values )
+    axs[0].plot(monthlyRevenueOverviewDataf['Median'] )
+    axs[0].set_title('Monthly median salary variations')
+    axs[0].set(xlabel='Months', ylabel='Median (USD)')
+
+    plt.xticks(monthlyRevenueOverviewDataf['Average'], monthlyRevenueOverviewDataf.index.values )
+    axs[1].plot(monthlyRevenueOverviewDataf['Average'] )
+    axs[1].set_title('Monthly avg salary variations')
+    axs[1].set(xlabel='Months', ylabel='Average (USD)')
+
+    plt.xticks(monthlyRevenueOverviewDataf['Maximum'], monthlyRevenueOverviewDataf.index.values )
+    axs[2].plot(monthlyRevenueOverviewDataf['Maximum'] )
+    axs[2].set_title('Monthly maximum salary variations')
+    axs[2].set(xlabel='Months', ylabel='Maximum (USD)')
+
+    axs[3].scatter(TOTAL_MONTHLY_REVENUE_COLUMN, USER_ID_COLUMN, data= eachStreamerTotalRevenueDataf)
+    axs[3].set_title('Money distribution')
+    axs[3].set(xlabel='USD', ylabel='IDs')
 
     print("\nData scanned in ", round(time.time()-t0, 2), " seconds\n")
+    plt.show()
