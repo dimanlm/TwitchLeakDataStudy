@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
     allMonthlyRevenuesDataf = pd.DataFrame()
     monthlyRevenueOverviewDataf = pd.DataFrame()
-    annualRevenueOverviewDf = pd.DataFrame()
+    annualRevenueOverviewDataf = pd.DataFrame()
 
     for i in range(1,TOTAL_MONTHS+1):
         if i<10:
@@ -79,16 +79,16 @@ if __name__ == "__main__":
     aggregateRevenues = {TOTAL_MONTHLY_REVENUE_COLUMN: 'sum'}
     eachStreamerTotalRevenueDataf= allMonthlyRevenuesDataf.groupby(USER_ID_COLUMN, as_index=False).aggregate(aggregateRevenues).reindex(columns=allMonthlyRevenuesDataf.columns)
 
-    annualRevenueOverviewDf.loc[i, "annual_Minimum"]= streamersMinimumRevenue(eachStreamerTotalRevenueDataf)[TOTAL_MONTHLY_REVENUE_COLUMN]
-    annualRevenueOverviewDf.loc[i, "annual_Maximum"]= streamersMaximumRevenue(eachStreamerTotalRevenueDataf)[TOTAL_MONTHLY_REVENUE_COLUMN]
-    annualRevenueOverviewDf.loc[i, "annual_Average"]= streamersAverageRevenue(eachStreamerTotalRevenueDataf)
-    annualRevenueOverviewDf.loc[i, "annual_Median"]= streamersMedianRevenue(eachStreamerTotalRevenueDataf)
+    annualRevenueOverviewDataf.loc[i, "annual_Minimum"]= streamersMinimumRevenue(eachStreamerTotalRevenueDataf)[TOTAL_MONTHLY_REVENUE_COLUMN]
+    annualRevenueOverviewDataf.loc[i, "annual_Maximum"]= streamersMaximumRevenue(eachStreamerTotalRevenueDataf)[TOTAL_MONTHLY_REVENUE_COLUMN]
+    annualRevenueOverviewDataf.loc[i, "annual_Average"]= streamersAverageRevenue(eachStreamerTotalRevenueDataf)
+    annualRevenueOverviewDataf.loc[i, "annual_Median"]= streamersMedianRevenue(eachStreamerTotalRevenueDataf)
 
     highestPaidStreamer = getStreamersNickname(str(streamersMaximumRevenue(eachStreamerTotalRevenueDataf).values[0])[:-2])
  
     print(monthlyRevenueOverviewDataf)
     print('\n')
-    print(annualRevenueOverviewDf)
-    print("Highest paid streamer of 2020: " + highestPaidStreamer)
+    print(annualRevenueOverviewDataf)
+    print("\nThe highest paid streamers of 2020: " + highestPaidStreamer)
 
     print("\nData scanned in ", round(time.time()-t0, 2), " seconds\n")
