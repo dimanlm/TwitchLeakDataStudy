@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import requests
 import time
-import matplotlib.pyplot as plt
+from matplotlib import pyplot as plt
 
 "----------------------------------------------------"
 
@@ -17,31 +17,35 @@ def getStreamersNickname(streamersUserID):
     return (requests.get(API_REQUEST_NICKNAME).text)
 
 
-def computeStreamersMonthlyIncome(twitchData):
-    allRevenueColumns = twitchData.columns.str.contains('_gross')
-    return(twitchData.iloc[:, allRevenueColumns].sum(axis=1))
+def computeStreamersMonthlyIncome(twitchDataf):
+    allRevenueColumns = twitchDataf.columns.str.contains('_gross')
+    return(twitchDataf.iloc[:, allRevenueColumns].sum(axis=1))
 
 
-def streamersMinimumRevenue(twitchData):
-    monthlyRevenueOverviewDf = pd.DataFrame(twitchData, columns=[USER_ID_COLUMN,TOTAL_MONTHLY_REVENUE_COLUMN])
+def streamersMinimumRevenue(twitchDataf):
+    monthlyRevenueOverviewDf = pd.DataFrame(twitchDataf, columns=[USER_ID_COLUMN,TOTAL_MONTHLY_REVENUE_COLUMN])
     getMinIncomeThisMonth = monthlyRevenueOverviewDf.loc[monthlyRevenueOverviewDf[TOTAL_MONTHLY_REVENUE_COLUMN].idxmin()]
     return (getMinIncomeThisMonth)
 
 
-def streamersMaximumRevenue(twitchData):
-    monthlyRevenueOverviewDf = pd.DataFrame(twitchData, columns=[USER_ID_COLUMN,TOTAL_MONTHLY_REVENUE_COLUMN])
+def streamersMaximumRevenue(twitchDataf):
+    monthlyRevenueOverviewDf = pd.DataFrame(twitchDataf, columns=[USER_ID_COLUMN,TOTAL_MONTHLY_REVENUE_COLUMN])
     getMaxIncomeThisMonth = monthlyRevenueOverviewDf.loc[monthlyRevenueOverviewDf[TOTAL_MONTHLY_REVENUE_COLUMN].idxmax()]
     return (getMaxIncomeThisMonth)
 
 
-def streamersAverageRevenue(twitchData):
-    monthlyRevenueColumn = pd.DataFrame(twitchData, columns=[TOTAL_MONTHLY_REVENUE_COLUMN])
+def streamersAverageRevenue(twitchDataf):
+    monthlyRevenueColumn = pd.DataFrame(twitchDataf, columns=[TOTAL_MONTHLY_REVENUE_COLUMN])
     return (round(monthlyRevenueColumn.mean().values[0], 2))
 
 
-def streamersMedianRevenue(twitchData):
-    monthlyRevenueColumn = pd.DataFrame(twitchData, columns=[TOTAL_MONTHLY_REVENUE_COLUMN])
+def streamersMedianRevenue(twitchDataf):
+    monthlyRevenueColumn = pd.DataFrame(twitchDataf, columns=[TOTAL_MONTHLY_REVENUE_COLUMN])
     return (monthlyRevenueColumn.median().values[0])
+
+
+def aggregateAllRevenues(twitchDataf, aggFunction):
+    return (twitchDataf.groupby(USER_ID_COLUMN, as_index=False).aggregate(aggFunction).reindex(columns=twitchDataf.columns))
 
 "----------------------------------------------------"
 "----------------------------------------------------"
@@ -76,8 +80,8 @@ if __name__ == "__main__":
         selectedColumnsToAppend = importedTwitchData[[USER_ID_COLUMN, TOTAL_MONTHLY_REVENUE_COLUMN]].copy()
         allMonthlyRevenuesDataf=allMonthlyRevenuesDataf.append(selectedColumnsToAppend, ignore_index=True)   
 
-    aggregateRevenues = {TOTAL_MONTHLY_REVENUE_COLUMN: 'sum'}
-    eachStreamerTotalRevenueDataf= allMonthlyRevenuesDataf.groupby(USER_ID_COLUMN, as_index=False).aggregate(aggregateRevenues).reindex(columns=allMonthlyRevenuesDataf.columns)
+    aggregateRevenuesFun = {TOTAL_MONTHLY_REVENUE_COLUMN: 'sum'}
+    eachStreamerTotalRevenueDataf= aggregateAllRevenues(allMonthlyRevenuesDataf, aggregateRevenuesFun)
 
     annualRevenueOverviewDataf.loc[i, "annual_Minimum"]= streamersMinimumRevenue(eachStreamerTotalRevenueDataf)[TOTAL_MONTHLY_REVENUE_COLUMN]
     annualRevenueOverviewDataf.loc[i, "annual_Maximum"]= streamersMaximumRevenue(eachStreamerTotalRevenueDataf)[TOTAL_MONTHLY_REVENUE_COLUMN]
@@ -89,6 +93,10 @@ if __name__ == "__main__":
     print(monthlyRevenueOverviewDataf)
     print('\n')
     print(annualRevenueOverviewDataf)
-    print("\nThe highest paid streamers of 2020: " + highestPaidStreamer)
+    print("\nThe highest paid streamer of 2020: " + highestPaidStreamer)
+
+    eachStreamerTotalRevenueDataf.sort_values(by=TOTAL_MONTHLY_REVENUE_COLUMN, ascending=False)
+    plt.scatter(x =  eachStreamerTotalRevenueDataf[TOTAL_MONTHLY_REVENUE_COLUMN],y=eachStreamerTotalRevenueDataf[USER_ID_COLUMN])
+    plt.show()
 
     print("\nData scanned in ", round(time.time()-t0, 2), " seconds\n")
