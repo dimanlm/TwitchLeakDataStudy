@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 import pandas as pd
-import numpy as np
 import requests
 import time
 from matplotlib import pyplot as plt
+from varfile import *
 
 "----------------------------------------------------"
 
@@ -62,36 +62,28 @@ def getRevenueOverview(aDataFrame, overviewDataFrame):
 if __name__ == "__main__":
     t0 = time.time()
 
-    TOTAL_MONTHLY_REVENUE_COLUMN = 'total_monthly_revenue'
-    USER_ID_COLUMN = 'user_id'
-    TOTAL_MONTHS = 12
-    CSV_FILE_NAME = '/all_revenues.csv'
-
     allMonthlyRevenuesDataf = pd.DataFrame()
     monthlyRevenueOverviewDataf = pd.DataFrame()
     annualRevenueOverviewDataf = pd.DataFrame()
 
     for i in range(1,TOTAL_MONTHS+1):
         if i<10:
-            PATH_TO_THE_CSV_FILE = 'LeakTwitch/all_revenues/2020/0'+str(i)
+            PATH_TO_THE_CSV_FILE = PATH_TO+'0'+str(i)
         else:
-            PATH_TO_THE_CSV_FILE = 'LeakTwitch/all_revenues/2020/'+str(i)
+            PATH_TO_THE_CSV_FILE = PATH_TO+str(i)
         
         importedTwitchData = pd.read_csv(PATH_TO_THE_CSV_FILE+CSV_FILE_NAME)
         addNewColumnToDataFrame(importedTwitchData, TOTAL_MONTHLY_REVENUE_COLUMN, computeStreamersMonthlyIncome(importedTwitchData))
-
         monthlyRevenueOverviewDataf = getRevenueOverview(importedTwitchData, monthlyRevenueOverviewDataf)
-
         selectedColumnsToAppend = importedTwitchData[[USER_ID_COLUMN, TOTAL_MONTHLY_REVENUE_COLUMN]].copy()
         allMonthlyRevenuesDataf=allMonthlyRevenuesDataf.append(selectedColumnsToAppend, ignore_index=True)   
 
     aggregateRevenuesFun = {TOTAL_MONTHLY_REVENUE_COLUMN: 'sum'}
     eachStreamerTotalRevenueDataf= aggregateAllRevenues(allMonthlyRevenuesDataf, aggregateRevenuesFun)
-
     annualRevenueOverviewDataf = getRevenueOverview(eachStreamerTotalRevenueDataf, annualRevenueOverviewDataf)
-
+    
     highestPaidStreamer = getStreamersNickname(str(streamersMaximumRevenue(eachStreamerTotalRevenueDataf).values[0])[:-2])
- 
+
     print(monthlyRevenueOverviewDataf)
     print('\n')
     print(annualRevenueOverviewDataf)
@@ -115,7 +107,7 @@ if __name__ == "__main__":
     axs[2].set_title('Monthly maximum salary variations')
     axs[2].set(xlabel='Months', ylabel='Maximum (USD)')
 
-    axs[3].scatter(TOTAL_MONTHLY_REVENUE_COLUMN, USER_ID_COLUMN, data= eachStreamerTotalRevenueDataf)
+    axs[3].scatter(TOTAL_MONTHLY_REVENUE_COLUMN, USER_ID_COLUMN, data=eachStreamerTotalRevenueDataf)
     axs[3].set_title('Money distribution')
     axs[3].set(xlabel='USD', ylabel='IDs')
 
