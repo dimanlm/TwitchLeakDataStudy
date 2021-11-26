@@ -16,6 +16,15 @@ def getStreamersNickname(streamersUserID):
     API_REQUEST_NICKNAME = "https://customapi.aidenwallis.co.uk/api/v1/twitch/toName/"+streamersUserID
     return (requests.get(API_REQUEST_NICKNAME).text)
 
+def checkInternetConnection():
+    url = "http://www.google.com"
+    timeout = 5
+    connected = True
+    try:
+	    request = requests.get(url, timeout=timeout)
+    except (requests.ConnectionError, requests.Timeout) as exception:
+        connected = False
+    return connected
 
 def computeStreamersMonthlyIncome(twitchDataf):
     allRevenueColumns = twitchDataf.columns.str.contains('_gross')
@@ -49,12 +58,16 @@ def aggregateAllRevenues(twitchDataf, aggFunction):
 
 
 def getRevenueOverview(aDataFrame, overviewDataFrame):
-    overviewDataFrame.loc[i, "Minimum"]= streamersMinimumRevenue(aDataFrame)[TOTAL_MONTHLY_REVENUE_COLUMN]
-    overviewDataFrame.loc[i, "Maximum"]= streamersMaximumRevenue(aDataFrame)[TOTAL_MONTHLY_REVENUE_COLUMN]
-    overviewDataFrame.loc[i, "Who?"]= getStreamersNickname(str(streamersMaximumRevenue(aDataFrame)[USER_ID_COLUMN])[:-2])
     overviewDataFrame.loc[i, "Average"]= streamersAverageRevenue(aDataFrame)
     overviewDataFrame.loc[i, "Median"]= streamersMedianRevenue(aDataFrame)
+    overviewDataFrame.loc[i, "Minimum"]= streamersMinimumRevenue(aDataFrame)[TOTAL_MONTHLY_REVENUE_COLUMN]
+    overviewDataFrame.loc[i, "Maximum"]= streamersMaximumRevenue(aDataFrame)[TOTAL_MONTHLY_REVENUE_COLUMN]
+    if(checkInternetConnection()):
+        overviewDataFrame.loc[i, "Who_max?"]= getStreamersNickname(str(streamersMaximumRevenue(aDataFrame)[USER_ID_COLUMN])[:-2])
+    else:
+        overviewDataFrame.loc[i, "Who_max?"]= str(streamersMaximumRevenue(aDataFrame)[USER_ID_COLUMN])[:-2]  
     return overviewDataFrame
+
 
 "----------------------------------------------------"
 "----------------------------------------------------"
@@ -82,7 +95,10 @@ if __name__ == "__main__":
     eachStreamerTotalRevenueDataf= aggregateAllRevenues(allMonthlyRevenuesDataf, aggregateRevenuesFun)
     annualRevenueOverviewDataf = getRevenueOverview(eachStreamerTotalRevenueDataf, annualRevenueOverviewDataf)
     
-    highestPaidStreamer = getStreamersNickname(str(streamersMaximumRevenue(eachStreamerTotalRevenueDataf).values[0])[:-2])
+    if(checkInternetConnection()):
+        highestPaidStreamer = getStreamersNickname(str(streamersMaximumRevenue(eachStreamerTotalRevenueDataf).values[0])[:-2])
+    else:
+        highestPaidStreamer = str(streamersMaximumRevenue(eachStreamerTotalRevenueDataf).values[0])[:-2]
 
     print(monthlyRevenueOverviewDataf)
     print('\n')
