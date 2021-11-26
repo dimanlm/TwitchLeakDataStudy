@@ -47,6 +47,15 @@ def streamersMedianRevenue(twitchDataf):
 def aggregateAllRevenues(twitchDataf, aggFunction):
     return (twitchDataf.groupby(USER_ID_COLUMN, as_index=False).aggregate(aggFunction).reindex(columns=twitchDataf.columns))
 
+
+def getRevenueOverview(aDataFrame, overviewDataFrame):
+    overviewDataFrame.loc[i, "Minimum"]= streamersMinimumRevenue(aDataFrame)[TOTAL_MONTHLY_REVENUE_COLUMN]
+    overviewDataFrame.loc[i, "Maximum"]= streamersMaximumRevenue(aDataFrame)[TOTAL_MONTHLY_REVENUE_COLUMN]
+    overviewDataFrame.loc[i, "Who?"]= getStreamersNickname(str(streamersMaximumRevenue(aDataFrame)[USER_ID_COLUMN])[:-2])
+    overviewDataFrame.loc[i, "Average"]= streamersAverageRevenue(aDataFrame)
+    overviewDataFrame.loc[i, "Median"]= streamersMedianRevenue(aDataFrame)
+    return overviewDataFrame
+
 "----------------------------------------------------"
 "----------------------------------------------------"
 
@@ -71,11 +80,7 @@ if __name__ == "__main__":
         importedTwitchData = pd.read_csv(PATH_TO_THE_CSV_FILE+CSV_FILE_NAME)
         addNewColumnToDataFrame(importedTwitchData, TOTAL_MONTHLY_REVENUE_COLUMN, computeStreamersMonthlyIncome(importedTwitchData))
 
-        monthlyRevenueOverviewDataf.loc[i, "Minimum"]= streamersMinimumRevenue(importedTwitchData)[TOTAL_MONTHLY_REVENUE_COLUMN]
-        monthlyRevenueOverviewDataf.loc[i, "Maximum"]= streamersMaximumRevenue(importedTwitchData)[TOTAL_MONTHLY_REVENUE_COLUMN]
-        monthlyRevenueOverviewDataf.loc[i, "Who?"]= getStreamersNickname(str(streamersMaximumRevenue(importedTwitchData)[USER_ID_COLUMN])[:-2])
-        monthlyRevenueOverviewDataf.loc[i, "Average"]= streamersAverageRevenue(importedTwitchData)
-        monthlyRevenueOverviewDataf.loc[i, "Median"]= streamersMedianRevenue(importedTwitchData)
+        monthlyRevenueOverviewDataf = getRevenueOverview(importedTwitchData, monthlyRevenueOverviewDataf)
 
         selectedColumnsToAppend = importedTwitchData[[USER_ID_COLUMN, TOTAL_MONTHLY_REVENUE_COLUMN]].copy()
         allMonthlyRevenuesDataf=allMonthlyRevenuesDataf.append(selectedColumnsToAppend, ignore_index=True)   
@@ -83,10 +88,7 @@ if __name__ == "__main__":
     aggregateRevenuesFun = {TOTAL_MONTHLY_REVENUE_COLUMN: 'sum'}
     eachStreamerTotalRevenueDataf= aggregateAllRevenues(allMonthlyRevenuesDataf, aggregateRevenuesFun)
 
-    annualRevenueOverviewDataf.loc[i, "annual_Minimum"]= streamersMinimumRevenue(eachStreamerTotalRevenueDataf)[TOTAL_MONTHLY_REVENUE_COLUMN]
-    annualRevenueOverviewDataf.loc[i, "annual_Maximum"]= streamersMaximumRevenue(eachStreamerTotalRevenueDataf)[TOTAL_MONTHLY_REVENUE_COLUMN]
-    annualRevenueOverviewDataf.loc[i, "annual_Average"]= streamersAverageRevenue(eachStreamerTotalRevenueDataf)
-    annualRevenueOverviewDataf.loc[i, "annual_Median"]= streamersMedianRevenue(eachStreamerTotalRevenueDataf)
+    annualRevenueOverviewDataf = getRevenueOverview(eachStreamerTotalRevenueDataf, annualRevenueOverviewDataf)
 
     highestPaidStreamer = getStreamersNickname(str(streamersMaximumRevenue(eachStreamerTotalRevenueDataf).values[0])[:-2])
  
