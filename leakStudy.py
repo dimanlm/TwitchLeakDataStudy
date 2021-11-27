@@ -69,6 +69,31 @@ def getRevenueOverview(aDataFrame, overviewDataFrame):
     return overviewDataFrame
 
 
+def makePlotsToSeeTheData (monthlyDataFrame, totalRevDataFrame):
+    fig, axs = plt.subplots(4, 1, constrained_layout=True)
+    fig.suptitle('Twitch data plots', fontsize=16)
+    
+    plt.xticks(monthlyDataFrame['Median'], monthlyDataFrame.index.values )
+    axs[0].plot(monthlyDataFrame['Median'] )
+    axs[0].set_title('Monthly median salary variations')
+    axs[0].set(xlabel='Months', ylabel='Median (USD)')
+
+    plt.xticks(monthlyDataFrame['Average'], monthlyDataFrame.index.values )
+    axs[1].plot(monthlyDataFrame['Average'] )
+    axs[1].set_title('Monthly avg salary variations')
+    axs[1].set(xlabel='Months', ylabel='Average (USD)')
+
+    plt.xticks(monthlyDataFrame['Maximum'], monthlyDataFrame.index.values )
+    axs[2].plot(monthlyDataFrame['Maximum'] )
+    axs[2].set_title('Monthly maximum salary variations')
+    axs[2].set(xlabel='Months', ylabel='Maximum (USD)')
+
+    axs[3].scatter(TOTAL_MONTHLY_REVENUE_COLUMN, USER_ID_COLUMN, data=totalRevDataFrame)
+    axs[3].set_title('Money distribution')
+    axs[3].set(xlabel='USD', ylabel='IDs')
+    
+    plt.show()
+
 "----------------------------------------------------"
 "----------------------------------------------------"
 
@@ -105,27 +130,6 @@ if __name__ == "__main__":
     print(annualRevenueOverviewDataf)
     print("\nThe highest paid streamer of 2020: " + highestPaidStreamer)
 
-    fig, axs = plt.subplots(4, 1, constrained_layout=True)
-    fig.suptitle('Twitch data plots', fontsize=16)
-    
-    plt.xticks(monthlyRevenueOverviewDataf['Median'], monthlyRevenueOverviewDataf.index.values )
-    axs[0].plot(monthlyRevenueOverviewDataf['Median'] )
-    axs[0].set_title('Monthly median salary variations')
-    axs[0].set(xlabel='Months', ylabel='Median (USD)')
-
-    plt.xticks(monthlyRevenueOverviewDataf['Average'], monthlyRevenueOverviewDataf.index.values )
-    axs[1].plot(monthlyRevenueOverviewDataf['Average'] )
-    axs[1].set_title('Monthly avg salary variations')
-    axs[1].set(xlabel='Months', ylabel='Average (USD)')
-
-    plt.xticks(monthlyRevenueOverviewDataf['Maximum'], monthlyRevenueOverviewDataf.index.values )
-    axs[2].plot(monthlyRevenueOverviewDataf['Maximum'] )
-    axs[2].set_title('Monthly maximum salary variations')
-    axs[2].set(xlabel='Months', ylabel='Maximum (USD)')
-
-    axs[3].scatter(TOTAL_MONTHLY_REVENUE_COLUMN, USER_ID_COLUMN, data=eachStreamerTotalRevenueDataf)
-    axs[3].set_title('Money distribution')
-    axs[3].set(xlabel='USD', ylabel='IDs')
-
     print("\nData scanned in ", round(time.time()-t0, 2), " seconds\n")
-    plt.show()
+
+    makePlotsToSeeTheData(monthlyRevenueOverviewDataf, eachStreamerTotalRevenueDataf)
