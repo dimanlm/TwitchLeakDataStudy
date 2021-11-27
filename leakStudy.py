@@ -16,15 +16,15 @@ def getStreamersNickname(streamersUserID):
     API_REQUEST_NICKNAME = "https://customapi.aidenwallis.co.uk/api/v1/twitch/toName/"+streamersUserID
     return (requests.get(API_REQUEST_NICKNAME).text)
 
+
 def checkInternetConnection():
-    url = "http://www.google.com"
-    timeout = 5
     connected = True
     try:
-	    request = requests.get(url, timeout=timeout)
+	    request = requests.get("http://www.google.com", timeout=5)
     except (requests.ConnectionError, requests.Timeout) as exception:
         connected = False
     return connected
+
 
 def computeStreamersMonthlyIncome(twitchDataf):
     allRevenueColumns = twitchDataf.columns.str.contains('_gross')
