@@ -57,6 +57,11 @@ def aggregateAllRevenues(twitchDataf, aggFunction):
     return (twitchDataf.groupby(USER_ID_COLUMN, as_index=False).aggregate(aggFunction).reindex(columns=twitchDataf.columns))
 
 
+def getStatsOnAffiliateAttribution(twitchDataf):
+    return (twitchDataf.value_counts())
+    #return (twitchDataf.value_counts(normalize=True))
+
+
 def getRevenueOverview(aDataFrame, overviewDataFrame):
     overviewDataFrame.loc[i, "Average"]= streamersAverageRevenue(aDataFrame)
     overviewDataFrame.loc[i, "Median"]= streamersMedianRevenue(aDataFrame)
@@ -100,6 +105,8 @@ def makePlotsToSeeTheData (monthlyDataFrame, totalRevDataFrame):
 if __name__ == "__main__":
     t0 = time.time()
 
+    "----------------------------------------------------"
+
     allMonthlyRevenuesDataf = pd.DataFrame()
     monthlyRevenueOverviewDataf = pd.DataFrame()
     annualRevenueOverviewDataf = pd.DataFrame()
@@ -114,7 +121,7 @@ if __name__ == "__main__":
         addNewColumnToDataFrame(importedTwitchData, TOTAL_MONTHLY_REVENUE_COLUMN, computeStreamersMonthlyIncome(importedTwitchData))
         monthlyRevenueOverviewDataf = getRevenueOverview(importedTwitchData, monthlyRevenueOverviewDataf)
         selectedColumnsToAppend = importedTwitchData[[USER_ID_COLUMN, TOTAL_MONTHLY_REVENUE_COLUMN]].copy()
-        allMonthlyRevenuesDataf=allMonthlyRevenuesDataf.append(selectedColumnsToAppend, ignore_index=True)   
+        allMonthlyRevenuesDataf=allMonthlyRevenuesDataf.append(importedTwitchData[[USER_ID_COLUMN, TOTAL_MONTHLY_REVENUE_COLUMN]], ignore_index=True)   
 
     aggregateRevenuesFun = {TOTAL_MONTHLY_REVENUE_COLUMN: 'sum'}
     eachStreamerTotalRevenueDataf= aggregateAllRevenues(allMonthlyRevenuesDataf, aggregateRevenuesFun)
@@ -129,6 +136,14 @@ if __name__ == "__main__":
     print('\n')
     print(annualRevenueOverviewDataf)
     print("\nThe highest paid streamer of 2020: " + highestPaidStreamer)
+
+    "----------------------------------------------------"
+
+    affiliateAttributionDataf = pd.read_csv('LeakTwitch/shortctr/shortctr.csv')
+    affiliateNpartner = affiliateAttributionDataf['moneypenny_category']
+    print(getStatsOnAffiliateAttribution(affiliateNpartner))
+
+    "----------------------------------------------------"
 
     print("\nData scanned in ", round(time.time()-t0, 2), " seconds\n")
 
